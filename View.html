@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>All Books</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body class="Display">
+<div class="display-box" style="width: 95%; max-width: 1200px;">
+    <h2>All Books in Library</h2>
+    <div id="booksContainer" class="books-grid"></div>
+    <br>
+    <a href="Home.html" class="back-link">Back to Home</a>
+</div>
+
+<script>
+    function displayAllBooks() {
+        let books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+        let container = document.getElementById('booksContainer');
+        if (books.length === 0) {
+            container.innerHTML = '<p style="text-align:center;">No books added yet.</p>';
+            return;
+        }
+        container.innerHTML = '';
+        books.forEach(book => {
+            let card = `
+                <div class="book-card">
+                    <img src="${book.image}" alt="Book Cover">
+                    <h3>Book's Name : ${book.title}</h3>
+                    <p>Author's Name : ${book.author}</p>
+                    <p>Book's Type : ${book.type}</p>
+                    <p>Professor' Name : ${book.professor}</p>
+                </div>
+            `;
+            container.innerHTML += card;
+        });
+    }
+    window.onload = displayAllBooks;
+</script>
+</body>
+</html>

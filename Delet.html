@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title> Delete Book</title>
+    <link rel="stylesheet" href="style.css">
+  
+</head>
+<body class="Delete">
+<div class="display-box" style="max-width: 550px; margin: 40px auto;">
+    <div >
+        <h2>Delete Book</h2>
+        <label>Select book to delete:</label>
+        <select id="deleteSelect" class="my-input">
+            <option value="">-- Choose a book --</option>
+        </select>
+        <button onclick="deleteBook()" class="btn-submit" >Delete this book</button>
+        
+        <div class="side-area">
+            <h4>Last deleted book:</h4>
+            <div id="deletedInfo" class="deleted-card" style="display: none;"></div>
+        </div>
+        <br>
+        <a href="Home.html" style="display: block; text-align: center;"> Back to Home</a>
+    </div>
+</div>
+
+<script>
+    function loadBooksToDelete() {
+        let books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+        let select = document.getElementById('deleteSelect');
+        select.innerHTML = '<option value="">-- Choose a book --</option>';
+        books.forEach(book => {
+            let option = document.createElement('option');
+            option.value = book.id;
+            option.textContent = `${book.title} - ${book.author}`;
+            select.appendChild(option);
+        });
+    }
+
+    function deleteBook() {
+        let select = document.getElementById('deleteSelect');
+        let bookId = parseInt(select.value);
+        if (!bookId) { alert(" Please select a book"); return; }
+        let books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+        let bookIndex = books.findIndex(b => b.id === bookId);
+        if (bookIndex === -1) return;
+        let deletedBook = books[bookIndex];
+        books.splice(bookIndex, 1);
+        localStorage.setItem('libraryBooks', JSON.stringify(books));
+        
+        let deletedDiv = document.getElementById('deletedInfo');
+        deletedDiv.style.display = 'block';
+        deletedDiv.innerHTML = `
+            <strong>Deleted:</strong><br>
+            Title: ${deletedBook.title}<br>
+            Author: ${deletedBook.author}<br>
+            Type: ${deletedBook.type}<br>
+            Professor: ${deletedBook.professor}<br>
+            <img src="${deletedBook.image}" style="max-width:100px; border-radius:6px; margin-top:8px;">
+        `;
+        loadBooksToDelete();
+        select.value = "";
+    }
+
+    window.onload = loadBooksToDelete;
+</script>
+</body>
+</html>

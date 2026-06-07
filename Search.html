@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Book</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="Search">
+<div  style="max-width: 550px; margin: 50px auto;">
+    <div class="display-box" >
+        <h2>Search for a Book</h2>
+        <input type="text" id="searchKeyword" class="my-input" placeholder="Enter book title, author, or professor...">
+        <button onclick="searchBook()" class="btn-submit">Search</button>
+        <div id="searchResult" class="result-box"></div>
+        <br>
+        <a href="Home.html" >Back to Home</a>
+    </div>
+</div>
+
+<script>
+    function searchBook() {
+        let keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+        let resultDiv = document.getElementById('searchResult');
+        if (!keyword) { resultDiv.innerHTML = '<span class="not-found"> Please enter search term.</span>'; return; }
+        
+        let books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+        let found = books.find(book => 
+            book.title.toLowerCase().includes(keyword) || 
+            book.author.toLowerCase().includes(keyword) ||
+            (book.professor && book.professor.toLowerCase().includes(keyword))
+        );
+        
+        if (found) {
+            resultDiv.innerHTML = `
+                <div class="book-found">
+                    <h3>Book Found</h3>
+                    <p><strong>Title:</strong> ${found.title}</p>
+                    <p><strong>Author:</strong> ${found.author}</p>
+                    <p><strong>Type:</strong> ${found.type}</p>
+                    <p><strong>Professor:</strong> ${found.professor}</p>
+                    <img src="${found.image}" alt="Book Cover">
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = '<div class="not-found"> This book does not exist in the library.</div>';
+        }
+    }
+</script>
+</body>
+</html>

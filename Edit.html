@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Book</title>
+    <link rel="stylesheet" href="style.css">
+   
+</head>
+<body class="Edit">
+<div class="display-box" style="max-width: 550px; margin: 40px auto;">
+    <div>
+        <h2>Edit Book</h2>
+        <label>Select Book:</label>
+        <select id="bookSelect" class="my-input" onchange="loadBookData()">
+            <option value="">-- Choose a book --</option>
+        </select>
+        <form onsubmit="event.preventDefault(); updateBook();">
+            <input type="text" id="editTitle" class="my-input" placeholder="Book Name" required>
+            <input type="text" id="editAuthor" class="my-input" placeholder="Author Name" required>
+            <div class="radio-group">
+                <label><input type="radio" name="editType" value="Scientific"> Scientific</label>
+                <label><input type="radio" name="editType" value="Literary"> Literary</label>
+            </div>
+            <input type="text" id="editProfessor" class="my-input" placeholder="Professor Name" required>
+            <input type="file" id="editImage" accept="image/*" class="my-input">
+            <img id="editPreview" class="preview-img" src="" alt="Current Image">
+            <button type="submit" class="btn-submit" > Update Book</button>
+        </form>
+        <div id="updatedMessage" class="updated-card"></div>
+        <a href="Home.html" class="back-link">Back to Home</a>
+        
+    </div>
+</div>
+
+<script>
+    let currentBookId = null;
+    let books = [];
+
+    function loadBooksList() {
+        books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+        let select = document.getElementById('bookSelect');
+        select.innerHTML = '<option value="">-- Choose a book --</option>';
+        books.forEach(book => {
+            let option = document.createElement('option');
+            option.value = book.id;
+            option.textContent = `${book.title} - ${book.author}`;
+            select.appendChild(option);
+        });
+    }
+
+    function loadBookData() {
+        let select = document.getElementById('bookSelect');
+        let id = parseInt(select.value);
+        if (!id) return;
+        currentBookId = id;
+        let book = books.find(b => b.id === id);
+        if (book) {
+            document.getElementById('editTitle').value = book.title;
+            document.getElementById('editAuthor').value = book.author;
+            let typeRadios = document.querySelectorAll('input[name="editType"]');
+            typeRadios.forEach(radio => {
+                if (radio.value === book.type) radio.checked = true;
+            });
+            document.getElementById('editProfessor').value = book.professor || '';
+            let preview = document.getElementById('editPreview');
+            preview.src = book.image;
+            preview.style.display = 'block';
+            document.getElementById('editImage').value = '';
+        }
+    }
+
+    function updateBook() {
+        if (!currentBookId) { alert("Select a book first"); return; }
+        let newTitle = document.getElementById('editTitle').value.trim();
+        let newAuthor = document.getElementById('editAuthor').value.trim();
+        let newType = document.querySelector('input[name="editType"]:checked');
+        let newProfessor = document.getElementById('editProfessor').value.trim();
+        let newImageFile = document.getElementById('editImage').files[0];
+
+        if (!newTitle || !newAuthor || !newType || !newProfessor) {
+            alert("All fields are required");
+            return;
+        }
+
+        let bookIndex = books.findIndex(b => b.id === currentBookId);
+        if (bookIndex === -1) return;
+
+        let updateBookData = (imageBase64) => {
+            books[bookIndex] = {
+                ...books[bookIndex],
+                title: newTitle,
+                author: newAuthor,
+                type: newType.value,
+                professor: newProfessor,
+                image: imageBase64 || books[bookIndex].image
+            };
+            localStorage.setItem('libraryBooks', JSON.stringify(books));
+            showUpdatedBook(books[bookIndex]);
+            loadBooksList();
+            document.getElementById('bookSelect').value = "";
+            clearForm();
+        };
+
+        if (newImageFile) {
+            let reader = new FileReader();
+            reader.onload = function(e) { updateBookData(e.target.result); };
+            reader.readAsDataURL(newImageFile);
+        } else {
+            updateBookData(null);
+        }
+    }
+
+    function showUpdatedBook(book) {
+        let msgDiv = document.getElementById('updatedMessage');
+        msgDiv.style.display = 'block';
+        msgDiv.innerHTML = `<strong>Book Updated:</strong><br>
+                            new book ${book.title}<br>Author ${book.author}<br>
+                            book type ${book.type}<br>Professor ${book.professor}<br>
+                            <img src="${book.image}" style="max-width:100px; border-radius:8px; margin-top:8px;">`;
+        setTimeout(() => { msgDiv.style.display = 'none'; }, 4000);
+    }
+
+    function clearForm() {
+        document.getElementById('editTitle').value = '';
+        document.getElementById('editAuthor').value = '';
+        document.querySelectorAll('input[name="editType"]').forEach(r => r.checked = false);
+        document.getElementById('editProfessor').value = '';
+        document.getElementById('editPreview').src = '';
+        document.getElementById('editPreview').style.display = 'none';
+        currentBookId = null;
+    }
+
+    window.onload = loadBooksList;
+</script>
+</body>
+</html>

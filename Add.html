@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title> Add New Book</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body class="Add">
+<div>
+    <div>
+        <h2 >Add New Book</h2>
+        <form onsubmit="event.preventDefault(); addBook();">
+            <input type="text" id="bookTitle" class="my-input" placeholder="Book Name" required>
+            <input type="text" id="bookAuthor" class="my-input" placeholder="Author Name" required>
+            
+            <div class="radio-group">
+                <label><input type="radio" name="bookType" value="Scientific" required> Scientific</label>
+                <label><input type="radio" name="bookType" value="Literary"> Literary</label>
+            </div>
+            
+            <input type="text" id="bookProfessor" class="my-input" placeholder="Professor Name" required>
+            
+            <label >Book Image:</label>
+            <input type="file" id="bookImage" accept="image/*" class="my-input"  required>
+            <img id="preview" class="preview-img" src="" alt="Preview" style="display: none;">
+            
+            <button type="submit" class="btn-submit" >Save Book</button>
+        </form>
+   <a href="Home.html" class="back-link">Back to Home</a>
+    </div>
+    <div id="lastAdded"></div>
+</div>
+
+<script>
+    function addBook() {
+        let title = document.getElementById('bookTitle').value.trim();
+        let author = document.getElementById('bookAuthor').value.trim();
+        let type = document.querySelector('input[name="bookType"]:checked');
+        let professor = document.getElementById('bookProfessor').value.trim();
+        let fileInput = document.getElementById('bookImage');
+        let file = fileInput.files[0];
+
+        if (!title || !author || !type || !file || !professor) {
+            alert(" Please fill all fields and select an image.");
+            return;
+        }
+
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let imageBase64 = e.target.result;
+            let books = JSON.parse(localStorage.getItem('libraryBooks')) || [];
+            let newBook = {
+                id: Date.now(),
+                title: title,
+                author: author,
+                type: type.value,
+                professor: professor,
+                image: imageBase64
+            };
+            books.push(newBook);
+            localStorage.setItem('libraryBooks', JSON.stringify(books));
+
+            document.getElementById('lastAdded').innerHTML = `
+                <div style="background:#e8f8f5; padding:15px; border-radius:12px;">
+                    <strong> Last Added Book:</strong><br>
+                    book's Name : ${title}<br>author " " ${author}<br>
+                    Type: ${type.value}<br> Professor: ${professor}<br>
+                    <img src="${imageBase64}" style="max-width:100px; margin-top:8px; border-radius:6px;">
+                </div>
+            `;
+            // Clear form
+            document.getElementById('bookTitle').value = '';
+            document.getElementById('bookAuthor').value = '';
+            document.querySelector('input[name="bookType"]:checked').checked = false;
+            document.getElementById('bookProfessor').value = '';
+            fileInput.value = '';
+            document.getElementById('preview').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('bookImage').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(ev) {
+                let preview = document.getElementById('preview');
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+</body>
+</html>
